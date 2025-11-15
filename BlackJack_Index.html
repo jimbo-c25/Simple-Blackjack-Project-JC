@@ -9,13 +9,21 @@
 <body>
     <h1>Blackjack</h1>
     <h2>Dealer: <span id="dealer-sum"></span></h2>
+
     <div id="dealer-cards">
+        <img id="starter-card">
         <img id="hidden-card" src="./CardDeck/BACK.png">
     </div>
     <h2>Player: <span id="player-sum"></span></h2>
     <div id="player-cards"></div>
 
     <br>
+    <p id="current-currency"></p>
+    <input type="text" required="true" id="currency-to-bet" placeholder="Place bets">
+    <button id="bet-btn">Bet</button>
+
+    <br>
+
     <button id="hit">Hit</button>
     <button id="stay">Stay</button>
     <p id="results"></p>
