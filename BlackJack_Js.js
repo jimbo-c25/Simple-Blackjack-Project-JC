@@ -1,13 +1,19 @@
 var dealerSum = 0;
 var playerSum = 0;
+var playerCurrency = 100;
+var currencyInput = document.getElementById("currency-to-bet").value;
+var currentCurrency = document.getElementById("current-currency");
+currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
 
 var dealerAceCount = 0;
 var playerAceCount = 0;
 // will be used to determine if ace's value = 1 or 11 //
 
+var starterDealer;
 var hidden;
 var deck;
-var canHit = true; /* allows player to hit is sum is <= 21*/
+var canHit = true; 
+/* allows player to hit is sum is <= 21*/
 
 window.onload = function() {
     buildDeck();
@@ -41,17 +47,15 @@ function startGame() {
     dealerSum += getValue(hidden);
     dealerAceCount += checkAce(hidden);
 
-    while(dealerSum < 17) {
-        let cardImage = document.createElement("img");
-        let card  = deck.pop();
-        cardImage.src = "./CardDeck/" + card + ".png";
-        dealerSum += getValue(card);
-        dealerAceCount += checkAce(card);
-        document.getElementById("dealer-cards").append(cardImage); /*will make new divs for the newly added cards for dealer */
-    };
+    starterDealer = deck.pop();
+    dealerSum += getValue(starterDealer);
+    dealerAceCount += checkAce(starterDealer);
+    let starterCardImage = document.getElementById("starter-card");
+    starterCardImage.src = "./CardDeck/" + starterDealer + ".png";
 
     for(let i = 0; i < 2; i++) {
         let cardImage = document.createElement("img");
+        cardImage.id = "playerCard-img";
         let card  = deck.pop();
         cardImage.src = "./CardDeck/" + card + ".png";
         playerSum += getValue(card);
@@ -61,12 +65,29 @@ function startGame() {
 };
 
 document.getElementById("hit").addEventListener("click", hit);
-document.getElementById("stay").addEventListener("click", stay);
+document.getElementById("stay").addEventListener("click", stay, {once: true});
+document.getElementById("bet-btn").addEventListener("click", betSystem, {once: true});
+
+function betSystem(currencyInput) {
+    currencyInput = parseInt(document.getElementById("currency-to-bet").value);
+
+    if (currencyInput > playerCurrency) {
+        alert("INSUFFICIENT FUNDS!!");
+        return currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
+    } else if (!currencyInput) {
+        alert("ENTER AN AMOUNT TO PLAY!!");
+    };
+
+    document.getElementById("player-sum").innerText = `$${currencyInput}`;
+    playerCurrency -= currencyInput;
+    currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
+};
 
 function hit() {
     if(!canHit) {
         return;
     };
+
     let cardImage = document.createElement("img");
     let card  = deck.pop();
     cardImage.src = "./CardDeck/" + card + ".png";
@@ -74,17 +95,30 @@ function hit() {
     playerAceCount += checkAce(card);
     document.getElementById("player-cards").append(cardImage);
 
+    if (reduceAce(playerSum, playerAceCount) >= 21) { //A, J, 8 -> 1 + 10 + 8
+        canHit = false;
+    };
 };
 
 function stay() {
+    while(dealerSum <= 17) {
+        let newDealerCard = document.createElement("img");
+        let dealersCard  = deck.pop();
+        newDealerCard.src = "./CardDeck/" + dealersCard + ".png";
+        dealerSum += getValue(dealersCard);
+        dealerAceCount += checkAce(dealersCard);
+        document.getElementById("dealer-cards").append(newDealerCard); /*will make new divs for the newly added cards for dealer */
+    };
+
     dealerSum = reduceAce(dealerSum, dealerAceCount);
     playerSum = reduceAce(playerSum, playerAceCount);
     canHit = false;
+
     resultCheck();
 };
 
 function getValue(card) {
-    let data = card.split("-");
+    let data = card.split("-"); // "4-C" will turn into -> ["4", "C"]
     let value = data[0];
 
     if(isNaN(value)) { /*A J Q K */
@@ -119,21 +153,34 @@ function resultCheck() {
 
         if (playerSum > 21) {
             message = "YOU LOSE!!";
+            document.getElementById("player-sum").innerText = playerSum + " -$" + currencyInput;
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
         else if (dealerSum > 21) {
             message = "YOU WIN!!";
+            document.getElementById("player-sum").innerText = playerSum + " +$" + currencyInput;
+            playerCurrency += parseInt(currencyInput * 2);
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
-        else if (playerSum == dealerSum) {
+        else if (playerSum === dealerSum) {
             message = "IT'S A TIE!!";
+            document.getElementById("player-sum").innerText = playerSum + " +$0";
+            playerCurrency = playerCurrency + parseInt(currencyInput);
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
         else if (playerSum > dealerSum) {
             message = "YOU WIN!!";
+            document.getElementById("player-sum").innerText = playerSum;
+            playerCurrency += parseInt(currencyInput * 2);
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
         else if (dealerSum > playerSum) {
             message = "YOU LOSE!!";
+            document.getElementById("player-sum").innerText = playerSum + " -$" + currencyInput;
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
 
       document.getElementById("dealer-sum").innerText = dealerSum;
-      document.getElementById("player-sum").innerText = playerSum;
       document.getElementById("results").innerText = message;
     }
+    
