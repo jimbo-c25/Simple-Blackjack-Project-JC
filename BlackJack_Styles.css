@@ -59,3 +59,20 @@ input {
     font-size: 25px;
     border-radius: 5px;
 }
+
+.hidden {
+    display: none;
+}
+
+#next-round {
+    width: 120px;
+    height: 40px;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+#results {
+    font-size: 25px;
+    font-weight: bold;
+    margin: 10px;
+}
