@@ -14,6 +14,10 @@ var hidden;
 var deck;
 var canHit = true; 
 /* allows player to hit is sum is <= 21*/
+var canBet = true;
+/* allows player to bet only once per round */
+var canStay = true;
+/* allows player to stay only after hitting */
 
 window.onload = function() {
     buildDeck();
@@ -65,10 +69,18 @@ function startGame() {
 };
 
 document.getElementById("hit").addEventListener("click", hit);
-document.getElementById("stay").addEventListener("click", stay, {once: true});
-document.getElementById("bet-btn").addEventListener("click", betSystem, {once: true});
+document.getElementById("stay").addEventListener("click", stay);
+document.getElementById("bet-btn").addEventListener("click", betSystem);
+document.getElementById("next-round").addEventListener("click", nextRound);
 
 function betSystem(currencyInput) {
+    if(!canBet) {
+        console.log("bets are off!!");
+        return;
+    };
+
+    canBet = false;
+    canStay = true;
     currencyInput = parseInt(document.getElementById("currency-to-bet").value);
 
     if (currencyInput > playerCurrency) {
@@ -101,6 +113,16 @@ function hit() {
 };
 
 function stay() {
+    if(!canStay) {
+        console.log("stay button disabled");
+        return;
+    };
+
+    canHit = false;
+    canStay = false;
+    
+    document.getElementById("next-round").classList.remove("hidden");
+
     while(dealerSum <= 17) {
         let newDealerCard = document.createElement("img");
         let dealersCard  = deck.pop();
@@ -112,9 +134,15 @@ function stay() {
 
     dealerSum = reduceAce(dealerSum, dealerAceCount);
     playerSum = reduceAce(playerSum, playerAceCount);
-    canHit = false;
 
     resultCheck();
+
+};
+
+function nextRound() {
+    shuffleDeck();
+    startGame();
+    document.getElementById("next-round").classList.add("hidden");
 };
 
 function getValue(card) {
@@ -170,7 +198,7 @@ function resultCheck() {
         }
         else if (playerSum > dealerSum) {
             message = "YOU WIN!!";
-            document.getElementById("player-sum").innerText = playerSum;
+            document.getElementById("player-sum").innerText = playerSum + " +$" + currencyInput;
             playerCurrency += parseInt(currencyInput * 2);
             currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
@@ -179,8 +207,20 @@ function resultCheck() {
             document.getElementById("player-sum").innerText = playerSum + " -$" + currencyInput;
             currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
         }
+        if (playerSum == 21) {
+            message = "YOU WIN!!";
+            document.getElementById("player-sum").innerText = playerSum + " +$" + (currencyInput * 1.5);
+            playerCurrency += parseInt(currencyInput * 0.5);
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
+        } 
+        else if (dealerSum == 21) {
+            message = "YOU LOSE!!";
+            document.getElementById("player-sum").innerText = playerSum + " -$" + currencyInput;
+            currentCurrency.innerText = `Current Funds: $${playerCurrency}`;
+        };
 
       document.getElementById("dealer-sum").innerText = dealerSum;
       document.getElementById("results").innerText = message;
-    }
+    };
+
     
