@@ -12,12 +12,10 @@ var playerAceCount = 0;
 var starterDealer;
 var hidden;
 var deck;
-var canHit = true; 
+var canHit = false; 
 /* allows player to hit is sum is <= 21*/
 var canBet = true;
-/* allows player to bet only once per round */
-var canStay = true;
-/* allows player to stay only after hitting */
+var canStay = false;
 
 window.onload = function() {
     buildDeck();
@@ -80,6 +78,7 @@ function betSystem(currencyInput) {
     };
 
     canBet = false;
+    canHit = true;
     canStay = true;
     currencyInput = parseInt(document.getElementById("currency-to-bet").value);
 
@@ -140,9 +139,23 @@ function stay() {
 };
 
 function nextRound() {
+    document.getElementById("next-round").classList.add("hidden");
+    dealerSum = 0;
+    playerSum = 0;
+    dealerAceCount = 0;
+    playerAceCount = 0;
+    canBet = true;
+
+    document.getElementById("dealer-sum").innerText = "";
+    document.getElementById("player-sum").innerText = "";
+    document.getElementById("results").innerText = "";
+
+    document.getElementById("dealer-cards").innerHTML = `<img id="starter-card"><img id="hidden-card" src="./CardDeck/BACK.png">`;
+    document.getElementById("player-cards").innerHTML = "";
+
+    buildDeck();
     shuffleDeck();
     startGame();
-    document.getElementById("next-round").classList.add("hidden");
 };
 
 function getValue(card) {
@@ -175,6 +188,10 @@ function reduceAce(playerSum, playerAceCount) {
 };
 
 function resultCheck() {
+    console.log("Checking Results...");
+    console.log(playerSum);
+    console.log(dealerSum);
+
     let message = "";
     document.getElementById("hidden-card").src = "./CardDeck/" + hidden + ".png";
     reduceAce(playerSum, playerAceCount);
