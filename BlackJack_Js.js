@@ -18,6 +18,8 @@ var canBet = true;
 var canStay = false;
 
 window.onload = function() {
+    alert
+    ("Welcome to my blackjack game!!! To anyone that I know irl, please give me any feedback you have to improve the game!! There's going to be some bugs after uploading this, but please enjoy :D");
     buildDeck();
     shuffleDeck();
     startGame();
